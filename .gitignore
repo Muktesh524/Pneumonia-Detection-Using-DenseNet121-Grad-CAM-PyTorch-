@@ -1,0 +1,42 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# VSCode
+.vscode/
+
+# PyTorch model weights
+*.pth
+*.pt
+
+# Output folders
+outputs/
+
+# Dataset
+data/
+datasets/
+*.zip
+*.tar
+*.tar.gz
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs
+*.log
+
+# OS-specific
+Thumbs.db
+.DS_Store
+
+# Python cache
+*.egg-info/
+dist/
+build/

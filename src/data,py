@@ -1,0 +1,74 @@
+import torch
+from torchvision import transforms, datasets
+from torch.utils.data import DataLoader
+from pathlib import Path
+
+class PneumoniaDataset:
+    def __init__(self, data_dir):
+        self.data_dir = Path(data_dir)
+        self.setup_transforms()
+        self.load_data()
+    
+    def setup_transforms(self):
+        """Define preprocessing and augmentation transforms"""
+        self.data_transforms = {
+            'train': transforms.Compose([
+                transforms.Resize((224, 224)),
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomRotation(10),
+                transforms.ColorJitter(brightness=0.2, contrast=0.2),
+                transforms.ToTensor(),
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+            ]),
+            'val': transforms.Compose([
+                transforms.Resize((224, 224)),
+                transforms.ToTensor(),
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+            ]),
+            'test': transforms.Compose([
+                transforms.Resize((224, 224)),
+                transforms.ToTensor(),
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+            ])
+        }
+    
+    def load_data(self):
+        """Load train, val, test datasets"""
+        self.image_datasets = {}
+        self.dataloaders = {}
+        self.dataset_sizes = {}
+        
+        phases = ['train', 'val', 'test']
+        for phase in phases:
+            try:
+                dataset = datasets.ImageFolder(
+                    str(self.data_dir / phase), 
+                    self.data_transforms[phase]
+                )
+                self.image_datasets[phase] = dataset
+                self.dataset_sizes[phase] = len(dataset)
+                self.dataloaders[phase] = DataLoader(
+                    dataset, 
+                    batch_size=32, 
+                    shuffle=(phase == 'train'), 
+                    num_workers=2
+                )
+                print(f"{phase}: {len(dataset)} images loaded")
+            except FileNotFoundError:
+                print(f"Warning: {phase} folder not found. Skipping...")
+                continue
+        
+        # Class names (0: NORMAL, 1: PNEUMONIA)
+        self.class_names = self.image_datasets['train'].classes if 'train' in self.image_datasets else ['NORMAL', 'PNEUMONIA']
+        print(f"Classes: {self.class_names}")
+    
+    def get_dataloaders(self):
+        return self.dataloaders
+    
+    def get_dataset_sizes(self):
+        return self.dataset_sizes
+
+# Test the dataset loading
+if __name__ == "__main__":
+    # This will be called from main.py with the downloaded path
+    print("Testing dataset loading...")
